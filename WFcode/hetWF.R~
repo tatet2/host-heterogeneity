@@ -1,0 +1,59 @@
+hetWF<-function(mu=.001,initPop,G=10000,k=50){
+  popsize<-sum(initPop) ## integer value of initial population size
+  pop<-initPop ## vector of population size of each allelic class
+    
+    
+  alleleV<-1:k ## vector of all possible alleles
+    
+    
+    ##  for each allelic class, deterimine the number of mutants in each group
+  for(i in 1:G){
+    offSpring<-rmultinom(1,popsize,pop) ## sample from multinomial dist
+    
+    mutNum<-rbinom(1,popsize, mu) ## number of mutations
+    muts <- rmultinom(1,mutNum,offSpring) ## mutations arising from each class
+        
+                    
+    noMut<-offSpring-muts ## remove mutants from population
+        
+        
+    if(mutNum>=1){
+      mutGroup<-alleleV[muts>0] ## find allelic classes with mutatations  
+            
+
+      ## for each allele class with mutations, determine the new allele class
+      mutType<-rep(0,k)
+      for(j in mutGroup){
+        mutDist <- rmultinom(1,muts[j], rep(1/(k-1),k-1))
+        if(j==1){
+          mutDist2 <- c(0,mutDist)
+        }
+        else if(j==k){
+          mutDist2 <- c(mutDist,0)
+        }
+        else{
+          mutDist2 <- c(mutDist[1:(j-1)],0,mutDist[j:(k-1)])
+        }
+        mutType <- mutType+mutDist2
+      }
+           
+      newPop<-noMut+mutType 
+            
+      pop<-newPop
+    }
+    else{
+      pop<-offSpring
+    }
+  }
+
+  
+
+  res<-as.vector(pop)                   
+  return(res)
+    
+}
+
+ 
+###
+
+
